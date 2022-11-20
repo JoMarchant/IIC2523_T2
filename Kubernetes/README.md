@@ -115,8 +115,35 @@ de tipo NodePort llamado `kubernetes-bootcamp`, este servicio expone el puerto 8
 
 3.  También se puede comprobar que la aplicación sigue corriendo con el comando `kubectl exec -ti $POD_NAME -- curl localhost:8080`. Se puede observar que la aplicación sigue corriendo, ya que el servicio se eliminó pero no el despliegue.
 
+## 5. Escalar una aplicación
 
+### 5.1 Introducción
 
+En los pasos anteriores se ha visto como desplegar una aplicación y exponerla públicamente. Ahora se verá como escalar una aplicación. Esto es necesario ya que en un ambiente de producción se necesitan más pods para soportar el tráfico de la aplicación.
+
+**¿Qué es un replicaset?**
+
+Un replicaset es un objeto que define un conjunto de pods y una política para mantener el número de pods en el conjunto. Los replicaset se utilizan para escalar una aplicación.
+
+### 5.2 Escalar una aplicación
+
+1.  Para ver el replicaset de nuestro despliegue se debe ejecutar el comando `kubectl get replicasets`. Así debería verse la consola: ![get_replicasets](./screenshots/get_replicasets.png) Se puede observar que el replicaset y que está ready. Desired es el número de pods que se desean tener y Current es el número de pods que se tienen actualmente.
+
+2.  Vamos a escalar la aplicación a 4 pods con el comando `kubectl scale deployments/kubernetes-bootcamp --replicas=4`. Así debería verse la consola: ![scale_deployment](./screenshots/scale_deployment.png)
+
+3.  Veamos el número de pods que tenemos con el comando `kubectl get pods -o wide`. Así debería verse la consola: ![get_pods_scaled](./screenshots/get_pods_scaled.png) Se puede observar que hay 4 pods.
+
+### 5.3 Load Balancing
+
+1.  Creamos una variable de entorno con el comando `export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')`.
+
+2.  Ahora podemos acceder a la aplicación desplegada con el comando `curl $(minikube ip):$NODE_PORT`. Cada vez que se ejecuta, se obtiene un pod diferente. Así debería verse la consola: ![curl_scaled](./screenshots/curl_scaled.png)
+
+### 5.4 Scale Down
+
+1.  Para escalar la aplicación a 2 pods se debe ejecutar el comando `kubectl scale deployments/kubernetes-bootcamp --replicas=2`.
+
+2.  Corriendo el comando `kubectl get pods -o wide` se puede observar que hay 2 pods `Running`. Así debería verse la consola: ![get_pods_scaled_down](./screenshots/get_pods_scaled_down.png)
 
 
 
