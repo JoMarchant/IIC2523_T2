@@ -22,3 +22,25 @@ Consiste de dos tipos de recursos:
 
 5.  Para ver los nodos del cluster se debe ejecutar el comando `kubectl get nodes`. Así debería verse la consola: ![nodes](./screenshots/get_nodes.png) Se puede observar que hay un nodo en el cluster y que está en estado Ready.
 
+## 2. Desplegar una app
+
+### 2.1 Introducción
+Para realizar un despligue, primero se debe crear un arhivo con la configuración de despliegue.
+
+Cuando se realiza el despliegue, el controlador de despliegue se encarga de crear los pods y de mantenerlos en el estado deseado.
+
+Para crear un despliegue, se puede usar `kubectl`, este utiliza la API de Kubernetes para interactuar con el cluster.
+
+### 2.2 Creación de un despliegue
+
+1.  El primer comando que se debe ejecutar es `kubectl create deployment <nombre_deployment> --image=<nombre_imagen>`. En este caso se usa como imágen `kubernetes-bootcamp:v1`. Así debería verse la consola: ![create_deployment](./screenshots/create_deployment.png)
+
+2.  Para ver los despliegues se debe ejecutar el comando `kubectl get deployments`. Así debería verse la consola: ![get_deployments](./screenshots/get_deployments.png) Se puede observar que hay un despliegue llamado `kubernetes-bootcamp` y que está en estado `Available`, este está corriendo en un Docker container.
+
+3.  Para poder acceder a la aplicación desplegada, se debe ejecutar el comando `kubectl proxy` en un nuevo terminal. Así debería verse la consola: ![proxy](./screenshots/proxy.png)
+
+4.  Ahora se puede acceder a la aplicación desplegada con el comando `curl http://localhost:8001/version` en el navegador. Así debería verse la consola: ![version](./screenshots/version.png)
+
+5.  Para acceder a los pods a través de la API, primero se deben almacenar sus nombres con el siguiente comando en ENV: `export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')`. Así debería verse la consola: ![pod_name](./screenshots/pod_name.png)
+
+6.  Ahora se puede acceder a la aplicación desplegada con el comando `curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/`.
