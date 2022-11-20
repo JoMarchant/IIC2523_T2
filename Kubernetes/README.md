@@ -44,3 +44,30 @@ Para crear un despliegue, se puede usar `kubectl`, este utiliza la API de Kubern
 5.  Para acceder a los pods a través de la API, primero se deben almacenar sus nombres con el siguiente comando en ENV: `export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')`. Así debería verse la consola: ![pod_name](./screenshots/pod_name.png)
 
 6.  Ahora se puede acceder a la aplicación desplegada con el comando `curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/`.
+
+## Troubleshoot Kubernetes (get, describe, logs y exec)
+
+### 3.1 Introducción
+
+**¿Qué son los pods?**
+
+Un pod es un grupo de uno o más contenedores que se ejecutan en un nodo. Los pods se utilizan para ejecutar aplicaciones en Kubernetes. Comparten un espacio de red y almacenamiento.
+
+**¿Qué son los nodes?**
+
+Un nodo es una máquina de trabajo en Kubernetes, previamente preparada para ejecutar aplicaciones. Un nodo puede ser una máquina virtual o física, dependiendo del tipo de cluster. Los pods se ejecutan en los nodos.
+
+### 3.2 Troubleshoot
+
+1.  Para ver los pods se debe ejecutar el comando `kubectl get pods`. Así debería verse la consola: ![get_pods](./screenshots/get_pods.png) Se puede observar que hay un pod que está en estado `Running`.
+
+2.  Para ver la información detallada de un pod se debe ejecutar el comando `kubectl describe pods`. Esta información incluye el estado del pod, los eventos que han ocurrido en el pod, los recursos que se han asignado al pod, etc.
+
+3. Almaenar el nombre del pod en ENV: `export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')`. Así debería verse la consola: ![pod_name](./screenshots/pod_name.png)
+
+4. Para ver los logs de un pod se debe ejecutar el comando `kubectl logs $POD_NAME`.
+Así debería verse la consola: ![logs](./screenshots/logs.png)
+
+5.  Para ejecutar un comando en un pod se debe ejecutar el comando `kubectl exec -ti $POD_NAME <comando>`.
+
+6.  Podemos iniciar una sesión interactiva con el comando `kubectl exec -ti $POD_NAME bash`. Para ejecutar comandos internamente en el container de nuestra aplicación.
