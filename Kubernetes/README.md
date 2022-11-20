@@ -146,4 +146,37 @@ Un replicaset es un objeto que define un conjunto de pods y una política para m
 2.  Corriendo el comando `kubectl get pods -o wide` se puede observar que hay 2 pods `Running`. Así debería verse la consola: ![get_pods_scaled_down](./screenshots/get_pods_scaled_down.png)
 
 
+## 6. Actualizar una aplicación
 
+### 6.1 Introducción
+
+En los pasos anteriores se ha visto como desplegar una aplicación, exponerla públicamente y escalarla. Ahora se verá como actualizar una aplicación. Esto es necesario ya que en un ambiente de producción se necesitan actualizar las aplicaciones para agregar nuevas funcionalidades o corregir errores.
+
+Esto se puede lograr con rolling updates. Un rolling update es una actualización continua de una aplicación sin interrumpir el servicio. Esto se logra actualizando los pods de una aplicación de forma gradual.
+
+### 6.2 Actualizar una aplicación
+
+1.  Para ver la versión de la aplicación se debe ejecutar el comando `kubectl describe pods`. Así debería verse la consola: ![describe_pods](./screenshots/describe_pods.png) Se puede observar que la versión de la aplicación es v1.
+
+2.  Para actualizar la aplicación a la versión v2 se debe ejecutar el comando `kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=jocatalin/kubernetes-bootcamp:v2`. Así debería verse la consola: ![set_image](./screenshots/set_image.png) Este comando inicia una rolling update.
+
+3.  Revisemos si la app está corriendo con `kubectl descibe services/kubernetes-bootcamp`. El status debería ser Running.
+
+4.  Creemos una variable de entorno con el comando `export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')`.
+
+5.  Ahora podemos acceder a la aplicación desplegada con el comando `curl $(minikube ip):$NODE_PORT`. Así debería verse la consola: ![curl_v2](./screenshots/curl_v2.png) Se puede observar que la versión de la aplicación es v2.
+
+6.  También se puede confirmar la actualizacaión con el comando `rollout status deployments/kubernetes-bootcamp`. Así debería verse la consola: ![rollout_status](./screenshots/rollout_status.png) Se puede observar que la actualización se completó.
+
+### 6.3 Rollback a una versión anterior
+
+1.  Primero actualicemos a la versión v10 con el comando `kubectl set image deployments/kubernetes-bootcamp kubernetes-bootcamp=gcr.io/google-samples/kubernetes-bootcamp:v10`.
+
+2.  Al ejecutar el comando `kubetcl get pods` se puede observar que los pods están en estados con error. Así debería verse la consola: ![get_pods_error](./screenshots/get_pods_error.png)
+
+
+3.  Usando el comando `kubectl describe pods` se puede observar que en la sección de Image, dice que v10 no existe en el repositorio.
+
+4.  Para hacer rollback a la versión v2 se debe ejecutar el comando `kubectl rollout undo deployments/kubernetes-bootcamp`. Así debería verse la consola: ![rollout_undo](./screenshots/rollout_undo.png)
+
+5.  Al ejecutar `kubectl get pods` se puede observar que los pods están en estado Running correctamente.
