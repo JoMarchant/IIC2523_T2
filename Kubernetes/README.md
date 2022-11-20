@@ -45,7 +45,7 @@ Para crear un despliegue, se puede usar `kubectl`, este utiliza la API de Kubern
 
 6.  Ahora se puede acceder a la aplicación desplegada con el comando `curl http://localhost:8001/api/v1/namespaces/default/pods/$POD_NAME/proxy/`.
 
-## Troubleshoot Kubernetes (get, describe, logs y exec)
+## 3. Troubleshoot Kubernetes (get, describe, logs y exec)
 
 ### 3.1 Introducción
 
@@ -71,3 +71,52 @@ Así debería verse la consola: ![logs](./screenshots/logs.png)
 5.  Para ejecutar un comando en un pod se debe ejecutar el comando `kubectl exec -ti $POD_NAME <comando>`.
 
 6.  Podemos iniciar una sesión interactiva con el comando `kubectl exec -ti $POD_NAME bash`. Para ejecutar comandos internamente en el container de nuestra aplicación.
+
+## 4. Exponer una aplicación públicamente
+
+### 4.1 Introducción
+
+**¿Qué es un servicio?**
+
+Un servicio es un objeto que define un conjunto de pods y una política para acceder a ellos. Los servicios permiten que los pods se comuniquen entre sí y con otros servicios externos.
+
+**¿Qué es un label?**
+
+Un label es un par clave-valor que se asigna a un objeto. Los labels permiten identificar objetos de manera que puedan ser seleccionados y agrupados.
+
+### 4.2 Exponer una aplicación
+
+1.  Para obtener la lista de servicios se debe ejecutar el comando `kubectl get services`. Así debería verse la consola: ![get_services](./screenshots/get_services.png) Se puede observar que hay un servicio llamado `kubernetes` y este se crea por defecto.
+
+2.  Para crear un servicio se debe ejecutar el comando `kubectl expose deployment/kubernetes-bootcamp --type="NodePort" --port 8080`. Así debería verse la consola: ![expose_deployment](./screenshots/expose_deployment.png) Ahora hay un servicio
+de tipo NodePort llamado `kubernetes-bootcamp`, este servicio expone el puerto 8080 del pod.
+
+3.  Ahora creamos una variable de entorno con el comando `export NODE_PORT=$(kubectl get services/kubernetes-bootcamp -o go-template='{{(index .spec.ports 0).nodePort}}')`. Así debería verse la consola: ![node_port](./screenshots/node_port.png)
+
+4.  Ahora podemos acceder a la aplicación desplegada con el comando `curl $(minikube ip):$NODE_PORT`. Así debería verse la consola: ![curl](./screenshots/curl.png)
+
+### 4.3 Labels de aplicación
+
+1. Para obtener el label de nuestro despliegue, ejecutamos el comando `kubectl describe deployment`. Así debería verse la consola: ![describe_deployment](./screenshots/describe_deployment.png) Se puede observar que el label de nuestro despliegue es `app=kubernetes-bootcamp`.
+
+2.  Para obtener los pods que tienen el label `app=kubernetes-bootcamp` se debe ejecutar el comando `kubectl get pods -l app=kubernetes-bootcamp`.
+
+3.  Se puede hacer lo mismo con los servicios, para obtener los servicios que tienen el label `app=kubernetes-bootcamp` se debe ejecutar el comando `kubectl get services -l app=kubernetes-bootcamp`.
+
+4.  Guardemos el nombre del pod en una variable de entorno con el comando `export POD_NAME=$(kubectl get pods -o go-template --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}')`.
+
+5. Para agregar un nuevo label a un pod se debe ejecutar el comando `kubectl label pod $POD_NAME app=v1`. Así debería verse la consola: ![label_pod](./screenshots/label_pod.png)
+
+### Eliminar un servicio
+
+1.  Para eliminar un servicio se debe ejecutar el comando `kubectl delete service -l app=kubernetes-bootcamp`. Se puede colocar otra label dependiendo del servicio que se desea borrar. Así debería verse la consola: ![delete_service](./screenshots/delete_service.png)
+
+2.  Podemos confirmar que el servicio se ha eliminado con el comando `kubectl get services`. También se puede ver que `curl $(minikube ip):$NODE_PORT` ya no funciona.
+
+3.  También se puede comprobar que la aplicación sigue corriendo con el comando `kubectl exec -ti $POD_NAME -- curl localhost:8080`. Se puede observar que la aplicación sigue corriendo, ya que el servicio se eliminó pero no el despliegue.
+
+
+
+
+
+
