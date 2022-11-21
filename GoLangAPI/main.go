@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"product/api/models"
 	"log"
+	"strconv"
+	"database/sql"
 )
 
 func main() {
@@ -26,7 +28,7 @@ func main() {
 }
 
 func checkErr(err error) {
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		log.Fatal(err)
 	}
 }
@@ -54,7 +56,19 @@ func getProducts(c *gin.Context) {
 }
 
 func getProduct(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "All Records"})
+	id_param := c.Param("id")
+	id, err := strconv.ParseInt(id_param, 10, 32)
+
+	checkErr(err)
+
+	product, err := models.GetProduct(int(id))
+	checkErr(err)
+
+	if err != nil || product.Created_at == "" {
+		c.JSON(404, gin.H{"message": "No Record Found!"})
+	} else {
+		c.JSON(200, gin.H{"data": product})
+	}
 }
 
 func updateProduct(c *gin.Context) {

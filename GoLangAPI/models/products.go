@@ -91,3 +91,26 @@ func CreateProduct(c *gin.Context) error {
 
 	return nil
 }
+
+func GetProduct(id int) (Product, error) {
+	singleProduct := Product{}
+
+	err := DB.QueryRow("SELECT * FROM products WHERE id = ?", id).Scan(
+		&singleProduct.Id,
+		&singleProduct.Name,
+		&singleProduct.Description,
+		&singleProduct.Price,
+		&singleProduct.Exp_date,
+		&singleProduct.Created_at)
+
+	// in case no record found
+	if err == sql.ErrNoRows {
+		return singleProduct, nil
+	}
+
+	if err != nil {
+		return singleProduct, err
+	}
+
+	return singleProduct, nil
+}
