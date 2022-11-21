@@ -32,7 +32,14 @@ func checkErr(err error) {
 }
 
 func createProduct(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "A new Record Created!"})
+	result := models.CreateProduct(c)
+
+	if result == nil {
+		c.JSON(200, gin.H{"message": "Record Created!"})
+	} else {
+		c.JSON(500, gin.H{"message": "Error!"})
+		log.Fatal(result)
+	}
 }
 
 func getProducts(c *gin.Context) {

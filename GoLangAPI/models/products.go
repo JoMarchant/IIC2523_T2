@@ -1,8 +1,10 @@
 package models
 
 import (
+	"errors"
 	"database/sql"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/gin-gonic/gin"
 )
 
 var DB *sql.DB
@@ -22,7 +24,7 @@ type Product struct {
 	Name     string `json:"name"`
 	Description      string `json:"description"`
 	Price    int `json:"price"`
-	Fecha_exp      string `json:"fecha_exp"`
+	Exp_date      string `json:"exp_date"`
 	Created_at string `json:"created_at"`
 }
 
@@ -45,7 +47,7 @@ func GetProducts() ([]Product, error) {
 			&singleProduct.Name,
 			&singleProduct.Description,
 			&singleProduct.Price,
-			&singleProduct.Fecha_exp,
+			&singleProduct.Exp_date,
 			&singleProduct.Created_at)
 
 		if err != nil {
@@ -62,4 +64,30 @@ func GetProducts() ([]Product, error) {
 	}
 
 	return Products, nil
+}
+
+func CreateProduct(c *gin.Context) error {
+	stmt, err := DB.Prepare("INSERT INTO products (name, description, price, exp_date) VALUES (?, ?, ?, ?)")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	var productBody Product
+
+	c.BindJSON(&productBody)
+
+	r, err := stmt.Exec(productBody.Name, productBody.Description, productBody.Price, productBody.Exp_date)
+
+	if err != nil {
+		return err
+	}
+
+	if i, err := r.RowsAffected(); err != nil || i != 1 {
+		return errors.New("ERROR: Se esperaba una fila afectada")
+	}
+
+	return nil
 }
