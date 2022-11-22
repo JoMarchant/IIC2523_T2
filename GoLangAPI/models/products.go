@@ -165,3 +165,25 @@ func UpdateProduct(id int, c *gin.Context) error {
 
 	return nil
 }
+
+func DeleteProduct(id int) error {
+	stmt, err := DB.Prepare("DELETE FROM products WHERE id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	r, err := stmt.Exec(id)
+
+	if err != nil {
+		return err
+	}
+
+	if i, err := r.RowsAffected(); err != nil || i != 1 {
+		return errors.New("ERROR: Se esperaba una fila afectada")
+	}
+
+	return nil
+}

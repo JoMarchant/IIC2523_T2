@@ -86,6 +86,19 @@ func updateProduct(c *gin.Context) {
 		log.Print(result)
 	}
 }
+
 func deleteProduct(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "Record Deleted!"})
+	id_param := c.Param("id")
+	id, err := strconv.ParseInt(id_param, 10, 32)
+	checkErr(err)
+	result := models.DeleteProduct(int(id))
+
+	if result == nil {
+		c.JSON(200, gin.H{"message": "Record Deleted!"})
+	} else if result.Error() == "ERROR: Se esperaba una fila afectada" {
+		c.JSON(404, gin.H{"message": "No Record Found!"})
+	} else {
+		c.JSON(500, gin.H{"message": "Error!"})
+		log.Print(result)
+	}
 }
