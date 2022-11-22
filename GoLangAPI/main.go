@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"product/api/models"
-	"log"
-	"strconv"
 	"database/sql"
+	"github.com/gin-gonic/gin"
+	"log"
+	"product/api/models"
+	"strconv"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 
 func checkErr(err error) {
 	if err != nil && err != sql.ErrNoRows {
-		log.Fatal(err)
+		log.Print(err)
 	}
 }
 
@@ -40,7 +40,7 @@ func createProduct(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "Record Created!"})
 	} else {
 		c.JSON(500, gin.H{"message": "Error!"})
-		log.Fatal(result)
+		log.Print(result)
 	}
 }
 
@@ -72,7 +72,19 @@ func getProduct(c *gin.Context) {
 }
 
 func updateProduct(c *gin.Context) {
-	c.JSON(200, gin.H{"message": "Record Updated!"})
+	id_param := c.Param("id")
+	id, err := strconv.ParseInt(id_param, 10, 32)
+	checkErr(err)
+	result := models.UpdateProduct(int(id), c)
+
+	if result == nil {
+		c.JSON(200, gin.H{"message": "Record Updated!"})
+	} else if result.Error() == "ERROR: Se esperaba una fila afectada" {
+		c.JSON(404, gin.H{"message": "No Record Found!"})
+	} else {
+		c.JSON(500, gin.H{"message": "Error!"})
+		log.Print(result)
+	}
 }
 func deleteProduct(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "Record Deleted!"})

@@ -114,3 +114,54 @@ func GetProduct(id int) (Product, error) {
 
 	return singleProduct, nil
 }
+
+func UpdateProduct(id int, c *gin.Context) error {
+	// check if record exists
+	product, err := GetProduct(id)
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := DB.Prepare("UPDATE products SET name = ?, description = ?, price = ?, exp_date = ? WHERE id = ?")
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	var productBody Product
+
+	c.BindJSON(&productBody)
+
+	// if attribute is empty, use the old one
+	if productBody.Name == "" {
+		productBody.Name = product.Name
+	}
+
+	if productBody.Description == "" {
+		productBody.Description = product.Description
+	}
+
+	if productBody.Price == 0 {
+		productBody.Price = product.Price
+	}
+
+	if productBody.Exp_date == "" {
+		productBody.Exp_date = product.Exp_date
+	}
+
+
+	r, err := stmt.Exec(productBody.Name, productBody.Description, productBody.Price, productBody.Exp_date, id)
+
+	if err != nil {
+		return err
+	}
+
+	if i, err := r.RowsAffected(); err != nil || i != 1 {
+		return errors.New("ERROR: Se esperaba una fila afectada")
+	}
+
+	return nil
+}
