@@ -8,7 +8,7 @@ API de productos desarrollada en GoLang, se pueden crear productos, listarlos, a
 
 Para instalar el proyecto:
 1.  Se debe clonar el repositorio
-2.  Se debe tener gcc instalado para compilar la libreria de sqlite3
+2.  Se **debe tener gcc instalado** para compilar la libreria de sqlite3
 3.  Se debe tener instalado GoLang
 4.  Se debe ejecutar el comando `go get` para instalar las dependencias
 5.  Se debe ejecutar el comando `go run main.go` para ejecutar el proyecto
